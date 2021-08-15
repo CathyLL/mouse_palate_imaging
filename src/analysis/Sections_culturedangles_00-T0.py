@@ -1,26 +1,19 @@
-from pathlib import Path
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import ttest_ind
 
-# %% LOAD DATA i.e. ALL CSV FILES
+from src.analysis import data
 
-data_folder = Path('./data/raw_sections')
-all_files = data_folder.glob("*.csv")
-
-data = pd.concat([
-    pd.read_csv(file, index_col=0).assign(Filename=file.stem)
-    for file in all_files
-])
+# %% LOAD DATA
 
 data[['Stage', 'Sample', 'AP', 'CultureTime']] = data.Filename.str.split(' ', expand=True)
 data['CultureTime'] = data['CultureTime'].astype(float)
 
 data = data.groupby(['Stage', 'Sample', 'AP', 'CultureTime']).agg({'Angle': 'mean', 'Length': 'mean'})
 
-# %% ORGANISE DATA FOR T(in vivo)-T0
+# %%% ORGANISE DATA FOR T(in vivo)-T0
 
 data = data.reset_index()
 data = data.loc[
@@ -30,7 +23,7 @@ data = data.loc[
 
 data['Dissection'] = np.where(data.Sample.str.contains('Fix', regex=False), 'Tongue + mandible in situ', 'Tongue + mandible removed')
 
-# %% PLOT GRAPH
+# %%% PLOT GRAPH
 
 ax = sns.barplot(
     data=data,
@@ -81,7 +74,7 @@ sns.despine(top=True, right=True, left=True, bottom=False)
 plt.tight_layout()
 plt.show()
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% T TEST
+# %%%% T TEST
 
 data1_ant = data.loc[((data['Dissection'] == 'Tongue + mandible in situ') & (data['AP'] == 'ant')), 'Angle']
 data1_mid = data.loc[((data['Dissection'] == 'Tongue + mandible in situ') & (data['AP'] == 'mid')), 'Angle']

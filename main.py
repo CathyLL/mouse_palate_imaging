@@ -1,6 +1,5 @@
 from pathlib import Path
 import xml.etree.ElementTree as ET
-
 import pandas as pd
 
 data_folder = Path('./data/raw')

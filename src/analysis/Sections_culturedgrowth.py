@@ -5,15 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.stats import ttest_ind_from_stats
 
-# %% LOAD DATA i.e. ALL CSV FILES
-
-data_folder = Path('./data/raw_sections')
-all_files = data_folder.glob("*.csv")
-
-data = pd.concat([
-    pd.read_csv(file, index_col=0).assign(Filename=file.stem)
-    for file in all_files
-])
+from src.analysis import data
 
 # %% ORGANISE DATA
 
@@ -87,35 +79,17 @@ plt.grid(axis='y', alpha=.5)
 plt.tight_layout()
 plt.show()
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMPARE GROWTH RATES
-#
-# df = data.drop(columns=['Angle']).set_index(['Stage', 'Sample', 'AP', 'CultureTime']).unstack(3)
-#
-# df = data.groupby(['Stage', 'CultureTime']).Length.mean().unstack().T
-#
-# print(df.pct_change())
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% REGRESSION
-
-#data['DummyTime'] = data['CultureTime'].replace(72,1)
-
-# %% Regression based on continuous time, Length = m * CultureTime + c
+# %% REGRESSION
 
 model = smf.ols('Length ~ CultureTime', data=data)
 model = model.fit()
 
 model.summary()
 
-# model = smf.ols('Length ~ DummyTime', data=data)
-# model = model.fit()
-# model.summary()
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% WELCH'S T TEST
+# %%% WELCH'S T TEST
 
 data1_Ro = data.loc[((data['Stage'] == 'E12.5') & (data['AP'] == 'ant')), 'Angle']
 data1_Ik = data.loc[((data['Stage'] == 'E12.5') & (data['AP'] == 'post')), 'Angle']
-
-# Calculate mean growth rate ('MEAN'), and STD for each sample
 
 # E12.5
 print(ttest_ind_from_stats(mean1='MEAN', std1='STD', nobs1='NO.OF.OBSERVATIONS', mean2='MEAN', std2='STD', nobs2='NO.OF.OBSERVATIONS', equal_var=False))

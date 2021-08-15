@@ -6,16 +6,7 @@ import matplotlib.pyplot as plt
 from numpy.random import normal
 import seaborn as sns
 
-
-# %% LOAD DATA
-
-data_folder = Path('./data/raw_sections')
-all_files = data_folder.glob("*.csv")
-
-data = pd.concat([
-    pd.read_csv(file, index_col=0).assign(Filename=file.stem)
-    for file in all_files
-])
+from src.analysis import data
 
 # %% ORGANISE DATA
 
@@ -47,13 +38,13 @@ data_ikemoto = data.loc[
                 ((data['Sample'].str.contains('Cul')) & (data['CultureTime'] == 0)))
         , :]
 
-def create_regression_results(roller, ikemoto):
-    # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% REGRESSION
+# %%% REGRESSION
 
+def create_regression_results(roller, ikemoto):
     model_roller = smf.ols('Length ~ CultureTime', data=roller).fit()
     model_ikemoto = smf.ols('Length ~ CultureTime', data=ikemoto).fit()
 
-    # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PERCENTAGE CHANGE
+    # %%% PERCENTAGE CHANGE
 
     model_ikemoto_adj = smf.ols(
         'Length ~ CultureTime',
@@ -93,37 +84,6 @@ growth_rates = {
             , :]
     ) for level in stage
 }
-#
-# e_125_growth_rates = create_regression_results(
-#     roller=data.loc[
-#               data['Stage'].str.contains('E12.5') &
-#               #data['AP'].str.contains('post') &
-#               (((data['Sample'].str.contains('Cul')) & (~data['Sample'].str.contains('CulIk')) & (data['CultureTime'] == 3)) |
-#               ((data['CultureTime'] == 0)))
-#         , :],
-#     ikemoto=data.loc[
-#                data['Stage'].str.contains('E12.5') &
-#                #data['AP'].str.contains('post') &
-#                (((data['Sample'].str.contains('CulIk'))) |
-#                 ((data['Sample'].str.contains('Cul')) & (data['CultureTime'] == 0)))
-#         , :]
-# )
-#
-#
-# e_135_growth_rates = create_regression_results(
-#     roller=data.loc[
-#               data['Stage'].str.contains('E13.5') &
-#               #data['AP'].str.contains('post') &
-#               (((data['Sample'].str.contains('Cul')) & (~data['Sample'].str.contains('CulIk')) & (data['CultureTime'] == 3)) |
-#               ((data['CultureTime'] == 0)))
-#         , :],
-#     ikemoto=data.loc[
-#                data['Stage'].str.contains('E13.5') &
-#                #data['AP'].str.contains('post') &
-#                (((data['Sample'].str.contains('CulIk'))) |
-#                 ((data['Sample'].str.contains('Cul')) & (data['CultureTime'] == 0)))
-#         , :]
-# )
 
 simulated_data = pd.DataFrame({
     (sample, name): normal(
@@ -140,6 +100,8 @@ simulated_data.index.names = ['Stage', 'Culture System']
 
 pd.set_option('max_columns', 10)
 print(pd.concat(growth_rates, axis=1).T)
+
+# %%% PLOT GRAPH
 
 sns.violinplot(
     data=simulated_data.reset_index(),

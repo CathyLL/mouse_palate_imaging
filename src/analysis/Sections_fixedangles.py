@@ -5,15 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.stats import ttest_ind
 
-# %% LOAD DATA i.e. ALL CSV FILES
-
-data_folder = Path('./data/raw_sections')
-all_files = data_folder.glob("*.csv")
-
-data = pd.concat([
-    pd.read_csv(file, index_col=0).assign(Filename=file.stem)
-    for file in all_files
-])
+from src.analysis import data
 
 data[['Stage', 'Sample', 'AP', 'CultureTime']] = data.Filename.str.split(' ', expand=True)
 
@@ -23,7 +15,7 @@ data = data.reset_index()
 data = data.loc[(data['Stage'] == 'E12.5') & (data['Sample'].str.contains('Fix')) |
                 (data['Stage'] == 'E15.5') & (data['Sample'].str.contains('Fix'))]
 
-# %% PLOT GRAPH
+# %%% PLOT GRAPH
 
 ax = sns.barplot(
     data=data,
@@ -32,7 +24,7 @@ ax = sns.barplot(
     hue='Stage',
     hue_order=['E12.5', 'E15.5'],
     order=['ant','mid','post'],
-    palette="Blues", #{'E12.5': '#62b9dd', 'E15.5': '#0069c0'},
+    palette="Blues",
     saturation=0.8,
     ci=95,
     errwidth=1.5,
@@ -73,7 +65,7 @@ sns.despine(top=True, right=True, left=True, bottom=False)
 plt.tight_layout()
 plt.show()
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%% T TEST
+# %%% T TEST
 
 data1_ant = data.loc[((data['Stage'] == 'E12.5') & (data['AP'] == 'ant')), 'Angle']
 data1_mid = data.loc[((data['Stage'] == 'E12.5') & (data['AP'] == 'mid')), 'Angle']

@@ -15,4 +15,5 @@ pip install -r requirements.txt
 * Place the data in the `./data/raw` folder
 * Run `./main.py`
   * Cleaned data will then sit in `./results/data.xlsx`
-* All the graph files sit in `./src/analysis/*`
+* All the analysis files sit in `./src/analysis/*`
+  * Graphs generated from analyses will then sit in `./results/data.xlsx`

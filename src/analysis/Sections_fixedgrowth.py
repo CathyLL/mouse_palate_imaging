@@ -5,15 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 
-# %% LOAD DATA i.e. ALL CSV FILES
-
-data_folder = Path('./data/raw_sections')
-all_files = data_folder.glob("*.csv")
-
-data = pd.concat([
-    pd.read_csv(file, index_col=0).assign(Filename=file.stem)
-    for file in all_files
-])
+from src.analysis import data
 
 data[['Stage', 'Sample', 'AP', 'CultureTime']] = data.Filename.str.split(' ', expand=True)
 
@@ -74,24 +66,19 @@ plt.grid(axis='y', alpha=.5)
 plt.tight_layout()
 plt.show()
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%% Regression based on continuous time?
+# %% Regression
 
 fixed = data['Sample'].str.contains('Fix')
 data.loc[fixed, 'Stage'] = data.loc[fixed, 'Stage'].str.replace('E', '').astype(float)
-#
-# model = smf.ols('Length ~ Stage', data=data.loc[fixed])
-# model = model.fit()
-#
-# model.summary()
 
 data = data.loc[data['Sample'].str.contains('Fix') & ((data['Stage'] == 12.5) | (data['Stage'] == 13.5)), :]
 data.Stage = data.Stage.astype(float)
 data['Stage'] = data['Stage'] - 12.5
 
-# %%%%%%%%%%% REGRESSION
+# %% REGRESSION
 model_data = smf.ols('Length ~ Stage', data=data).fit()
 
-# %%%%%%%%%%% PERCENTAGE CHANGE
+# %% PERCENTAGE CHANGE
 model_data_adj = smf.ols(
         'Length ~ Stage',
         data=data.assign(Length=data['Length'] / model_data.params['Intercept'])

@@ -4,22 +4,14 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.stats import ttest_ind
 
-# %% LOAD DATA i.e. ALL CSV FILES
-
-data_folder = Path('./data/raw_sections')
-all_files = data_folder.glob("*.csv")
-
-data = pd.concat([
-    pd.read_csv(file, index_col=0).assign(Filename=file.stem)
-    for file in all_files
-])
+from src.analysis import data
 
 data[['Stage', 'Sample', 'AP', 'CultureTime']] = data.Filename.str.split(' ', expand=True)
 data['CultureTime'] = data['CultureTime'].astype(float)
 
 data = data.groupby(['Stage', 'Sample', 'AP', 'CultureTime']).agg({'Angle': 'mean', 'Length': 'mean'})
 
-# # %% ORGANISE DATA FOR T0-T20
+# %%% ORGANISE DATA FOR T0-T20
 
 data = data.reset_index()
 data = data.loc[
@@ -32,7 +24,7 @@ data = data.loc[
 data = data.sort_values('CultureTime')
 data['CultureTime'] = data['CultureTime'].astype(int).astype(str) + ' minutes'
 
-# %% PLOT GRAPH FOR T0-T20
+# %%% PLOT GRAPH FOR T0-T20
 
 ax = sns.barplot(
     data=data,
@@ -83,7 +75,7 @@ sns.despine(top=True, right=True, left=True, bottom=False)
 plt.tight_layout()
 plt.show()
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%% T TEST
+# %%%% T TEST
 
 data1_ant = data.loc[((data['CultureTime'] == '0 minutes') & (data['AP'] == 'ant')), 'Angle']
 data1_mid = data.loc[((data['CultureTime'] == '0 minutes') & (data['AP'] == 'mid')), 'Angle']

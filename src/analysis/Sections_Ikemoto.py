@@ -4,15 +4,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# %% LOAD SECTIONS DATA i.e. ALL CSV FILES
-
-data_folder = Path('./data/raw_sections')
-all_files = data_folder.glob("*.csv")
-
-data = pd.concat([
-    pd.read_csv(file, index_col=0).assign(Filename=file.stem)
-    for file in all_files
-])
+from src.analysis import data
 
 # %% ORGANISE DATA
 
@@ -23,7 +15,7 @@ data = data.groupby(['Stage', 'Sample', 'AP', 'CultureTime']).agg({'Angle': 'mea
 
 data = data.reset_index()
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ORGANISE DATA FOR GROWTH
+# %% ORGANISE DATA FOR IKEMOTO GROWTH
 
 data = data.loc[
        data['Stage'].str.contains('E12.5') &
@@ -87,44 +79,3 @@ sns.despine(left=True)
 plt.grid(axis='y', alpha=.5)
 plt.tight_layout()
 plt.show()
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SHELF ELEVATION
-
-# %% PLOT GRAPH
-
-# ax = sns.barplot(
-#     data=data,
-#     x='AP',
-#     y='Angle',
-#     hue='CultureTime',
-#     hue_order=['0', '48'],
-#     order=['ant', 'mid', 'post'],
-#     ci=95,
-#     errwidth=2,
-#     capsize=.08,
-#     palette="Blues",
-#     saturation=0.8,
-# )
-#
-# ax.set_xlabel('Palatal shelf region, E12.5', fontsize=14)
-# ax.set_ylabel('Palatal Shelf Angle (degrees)', fontsize=14)
-#
-# plt.legend(title='Time in culture (hours)', fontsize=12)
-# sns.despine(left=True)
-# plt.tight_layout()
-# plt.show()
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMPARE GROWTH RATES
-
-# df = data.drop(columns=['Angle']).set_index(['Stage', 'Sample', 'AP', 'CultureTime']).unstack(3)
-#
-# df = data.groupby(['Stage', 'CultureTime']).Length.mean().unstack().T
-#
-# print(df.pct_change())
-#
-# # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% REGRESSION
-#
-# model = smf.ols('Length ~ CultureTime', data=data)
-# model = model.fit()
-#
-# model.summary()

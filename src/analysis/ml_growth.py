@@ -67,35 +67,46 @@ data = pd.concat([
 
 # %% Plot
 
-# Ikemoto sample
-#
-# ax = sns.lineplot(
-#     data=(
-#         data.loc[
-#                 ((data['CultureType'] == 'Ikemoto') | (data['Stage/Fixed'] == 'In vivo'))  # Either Ikemoto or In Vivo (whether Ikemoto or Normal, doesn't matter) (:Original code:)
-#                 | ((data.Time == 12.5) & (data['Stage/Fixed'].isin(['E12.5', 'In vivo'])))
-#                 | ((data.Time == 13.5) & (data['Stage/Fixed'].isin(['E13.5', 'In vivo'])))
-#             ]
-#             .sort_values(
-#                 'Stage/Fixed',
-#                 key=lambda x: x.str.replace('In vivo', '0').str.replace('E', '').astype(float)
-#             )
-#     ),
-#     x='Time',
-#     y='Mean Shelf Width',
-#     hue='Stage/Fixed',
-#     hue_order=['In vivo', 'E12.5', 'E13.5'],
-#     err_style='bars',
-#     palette={'E12.5': '#f210ea', 'E13.5': '#2AA61B', 'In vivo': '#000054'},
-#     # linestyle='dashed',
-#     lw=3
-# )
+# Normal sample
 
+ax = sns.lineplot(
+    data=(
+        data
+            .loc[
+                ((data['CultureType'] == 'Normal') | (data['Stage/Fixed'] == 'In vivo'))  # Either Normal or In Vivo (whether Ikemoto or Normal, doesn't matter) (:Original code:)
+                | ((data.Time == 12.5) & (data['Stage/Fixed'].isin(['E12.5', 'In vivo'])))
+                | ((data.Time == 13.5) & (data['Stage/Fixed'].isin(['E13.5', 'In vivo'])))
+            ]
+            .sort_values(
+                'Stage/Fixed',
+                key=lambda x: x.str.replace('In vivo', '0').str.replace('E', '').astype(float)
+            )
+    ),
+    x='Time',
+    y='Mean Shelf Width',
+    hue='Stage/Fixed',
+    hue_order=['In vivo', 'E12.5', 'E13.5'],
+    err_style='bars',
+    palette={'E12.5': '#f210ea', 'E13.5': '#2AA61B', 'In vivo': '#000054'},
+    lw=3
+)
+ax.set_xlabel('Embryonic Age (days)', fontsize=16)
+ax.set_ylabel('ML Shelf Width (mm)', fontsize=16)
+plt.tick_params(axis='x', labelsize=14)
+plt.tick_params(axis='y', labelsize=14)
+plt.legend(title=None, fontsize=16)
+sns.despine(left=True)
+plt.tight_layout()
+plt.show()
+
+# Ikemoto with global trend lines
 
 ax = sns.lineplot(
     data=(
         data.loc[
-                ((data['CultureType'] == 'Ikemoto') | (data['Stage/Fixed'] == 'In vivo'))  # Either Ikemoto or In Vivo (whether Ikemoto or Normal, doesn't matter) (:Original code:)
+                ((data['CultureType'] == 'Ikemoto') | (data['Stage/Fixed'] == 'In vivo'))
+                | ((data.Time == 12.5) & (data['Stage/Fixed'].isin(['E12.5', 'In vivo'])))
+                | ((data.Time == 13.5) & (data['Stage/Fixed'].isin(['E13.5', 'In vivo'])))
             ]
             .sort_values(
                 'Stage/Fixed',
@@ -112,7 +123,25 @@ ax = sns.lineplot(
     lw=3
 )
 
+# %% Ikemoto with separate cultured T0, global trend lines dashed
 
+ax = sns.lineplot(
+    data=(
+        data.loc[
+                ((data['CultureType'] == 'Ikemoto') | (data['Stage/Fixed'] == 'In vivo'))]
+                .sort_values(
+                'Stage/Fixed',
+                key=lambda x: x.str.replace('In vivo', '0').str.replace('E', '').astype(float)
+            )
+    ),
+    x='Time',
+    y='Mean Shelf Width',
+    hue='Stage/Fixed',
+    hue_order=['In vivo', 'E12.5', 'E13.5'],
+    err_style='bars',
+    palette={'E12.5': '#f210ea', 'E13.5': '#2AA61B', 'In vivo': '#000054'},
+    lw=3
+)
 
 ax = sns.lineplot(
     data=(
@@ -172,36 +201,3 @@ l = plt.legend(
 sns.despine(left=True)
 plt.tight_layout()
 plt.show()
-
-
-# Normal sample
-#
-# ax = sns.lineplot(
-#     data=(
-#         data
-#             .loc[
-#                 ((data['CultureType'] == 'Normal') | (data['Stage/Fixed'] == 'In vivo'))  # Either Normal or In Vivo (whether Ikemoto or Normal, doesn't matter) (:Original code:)
-#                 | ((data.Time == 12.5) & (data['Stage/Fixed'].isin(['E12.5', 'In vivo'])))
-#                 | ((data.Time == 13.5) & (data['Stage/Fixed'].isin(['E13.5', 'In vivo'])))
-#             ]
-#             .sort_values(
-#                 'Stage/Fixed',
-#                 key=lambda x: x.str.replace('In vivo', '0').str.replace('E', '').astype(float)
-#             )
-#     ),
-#     x='Time',
-#     y='Mean Shelf Width',
-#     hue='Stage/Fixed',
-#     hue_order=['In vivo', 'E12.5', 'E13.5'],
-#     err_style='bars',
-#     palette={'E12.5': '#f210ea', 'E13.5': '#2AA61B', 'In vivo': '#000054'},
-#     lw=3
-# )
-# ax.set_xlabel('Embryonic Age (days)', fontsize=16)
-# ax.set_ylabel('ML Shelf Width (mm)', fontsize=16)
-# plt.tick_params(axis='x', labelsize=14)
-# plt.tick_params(axis='y', labelsize=14)
-# plt.legend(title=None, fontsize=16)
-# sns.despine(left=True)
-# plt.tight_layout()
-# plt.show()

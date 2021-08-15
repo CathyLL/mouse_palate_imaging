@@ -10,16 +10,12 @@ sns.set_context('notebook')
 
 results_folder = Path(__file__).parents[2] / 'results'
 
-# %% Load Data
+# %% LOAD DATA
 
 data = (
     pd.read_excel(results_folder / 'data.xlsx', sheet_name='Distances', index_col='File')
         .loc[:, ['Dist(Ant shelf L, Post shelf L)', 'Dist(Ant shelf R, Post shelf R)', 'Info', 'Culture', 'Time']]
         .set_index(['Info', 'Culture', 'Time'], append=True)
-        # .rename_axis(columns=['Measurement'])
-        # .stack()
-        # .to_frame(name='Distance')
-        # .reset_index()
 )
 
 data = data[['Dist(Ant shelf L, Post shelf L)', 'Dist(Ant shelf R, Post shelf R)']].mean(axis=1).to_frame(name='Mean Shelf Length')
@@ -68,43 +64,86 @@ data = pd.concat([
     duplicated_data
 ])
 
-# %% Plot
+# %% PLOT GRAPH
 
-# Ikemoto sample
-#
-# ax = sns.lineplot(
-#     data=(
-#          data.loc[
-#                 ((data['CultureType'] == 'Ikemoto') | (data['Stage/Fixed'] == 'In vivo'))  # Either Ikemoto or In Vivo (whether Ikemoto or Normal, doesn't matter) (:Original code:)
-#                 | ((data.Time == 12.5) & (data['Stage/Fixed'].isin(['E12.5', 'In vivo'])))
-#                 | ((data.Time == 13.5) & (data['Stage/Fixed'].isin(['E13.5', 'In vivo'])))
-#             ]
-#             .sort_values(
-#                 'Stage/Fixed',
-#                 key=lambda x: x.str.replace('In vivo', '0').str.replace('E', '').astype(float)
-#             )
-#     ),
-#     x='Time',
-#     y='Mean Shelf Length',
-#     hue='Stage/Fixed',
-#     hue_order=['In vivo', 'E12.5', 'E13.5'],
-#     err_style='bars',
-#     palette={'E12.5': '#f210ea', 'E13.5': '#2AA61B', 'In vivo': '#000054'},
-#     lw=3,
-# )
-# ax.set_xlabel('Embryonic Age (days)', fontsize=16)
-# ax.set_ylabel('AP Shelf Length (mm)', fontsize=16)
-# plt.tick_params(axis='x', labelsize=14)
-# plt.tick_params(axis='y', labelsize=14)
+# Normal sample
+
+ax = sns.lineplot(
+    data=(
+        data
+            .loc[
+                ((data['CultureType'] == 'Normal') | (data['Stage/Fixed'] == 'In vivo'))  # Either Normal or In Vivo (whether Ikemoto or Normal, doesn't matter) (:Original code:)
+                | ((data.Time == 12.5) & (data['Stage/Fixed'].isin(['E12.5', 'In vivo'])))
+                | ((data.Time == 13.5) & (data['Stage/Fixed'].isin(['E13.5', 'In vivo'])))
+            ]
+            .sort_values(
+                'Stage/Fixed',
+                key=lambda x: x.str.replace('In vivo', '0').str.replace('E', '').astype(float)
+            )
+    ),
+    x='Time',
+    y='Mean Shelf Length',
+    hue='Stage/Fixed',
+    hue_order=['In vivo', 'E12.5', 'E13.5'],
+    err_style='bars',
+    palette={'E12.5': '#f210ea', 'E13.5': '#2AA61B', 'In vivo': '#000054'},
+    lw=3
+)
+ax.set_xlabel('Embryonic Age (days)', fontsize=16)
+ax.set_ylabel('AP Shelf Length (mm)', fontsize=16)
+plt.tick_params(axis='x', labelsize=14)
+plt.tick_params(axis='y', labelsize=14)
 # plt.legend(title=None, fontsize=16)
-# sns.despine(left=True)
-# plt.tight_layout()
-# plt.show()
+handles, labels = ax.get_legend_handles_labels()
+l = plt.legend(
+    handles[2:4],
+    labels[2:4],
+    title=None,
+    frameon=True,
+    fontsize=14,
+    title_fontsize=14
+)
+sns.despine(left=True)
+plt.tight_layout()
+plt.show()
+
+# Ikemoto sample with global trend lines
+
+ax = sns.lineplot(
+    data=(
+         data.loc[
+                ((data['CultureType'] == 'Ikemoto') | (data['Stage/Fixed'] == 'In vivo'))
+                | ((data.Time == 12.5) & (data['Stage/Fixed'].isin(['E12.5', 'In vivo'])))
+                | ((data.Time == 13.5) & (data['Stage/Fixed'].isin(['E13.5', 'In vivo'])))
+            ]
+            .sort_values(
+                'Stage/Fixed',
+                key=lambda x: x.str.replace('In vivo', '0').str.replace('E', '').astype(float)
+            )
+    ),
+    x='Time',
+    y='Mean Shelf Length',
+    hue='Stage/Fixed',
+    hue_order=['In vivo', 'E12.5', 'E13.5'],
+    err_style='bars',
+    palette={'E12.5': '#f210ea', 'E13.5': '#2AA61B', 'In vivo': '#000054'},
+    lw=3,
+)
+ax.set_xlabel('Embryonic Age (days)', fontsize=16)
+ax.set_ylabel('AP Shelf Length (mm)', fontsize=16)
+plt.tick_params(axis='x', labelsize=14)
+plt.tick_params(axis='y', labelsize=14)
+plt.legend(title=None, fontsize=16)
+sns.despine(left=True)
+plt.tight_layout()
+plt.show()
+
+# Ikemoto sample with separate cultured T0, and global trend lines dashed
 
 ax = sns.lineplot(
     data=(
         data.loc[
-                ((data['CultureType'] == 'Ikemoto') | (data['Stage/Fixed'] == 'In vivo'))  # Either Ikemoto or In Vivo (whether Ikemoto or Normal, doesn't matter) (:Original code:)
+                ((data['CultureType'] == 'Ikemoto') | (data['Stage/Fixed'] == 'In vivo'))
             ]
             .sort_values(
                 'Stage/Fixed',
@@ -176,46 +215,5 @@ l = plt.legend(
 sns.despine(left=True)
 plt.tight_layout()
 plt.show()
-
-# Normal sample
-
-# ax = sns.lineplot(
-#     data=(
-#         data
-#             .loc[
-#                 ((data['CultureType'] == 'Normal') | (data['Stage/Fixed'] == 'In vivo'))  # Either Normal or In Vivo (whether Ikemoto or Normal, doesn't matter) (:Original code:)
-#                 | ((data.Time == 12.5) & (data['Stage/Fixed'].isin(['E12.5', 'In vivo'])))
-#                 | ((data.Time == 13.5) & (data['Stage/Fixed'].isin(['E13.5', 'In vivo'])))
-#             ]
-#             .sort_values(
-#                 'Stage/Fixed',
-#                 key=lambda x: x.str.replace('In vivo', '0').str.replace('E', '').astype(float)
-#             )
-#     ),
-#     x='Time',
-#     y='Mean Shelf Length',
-#     hue='Stage/Fixed',
-#     hue_order=['In vivo', 'E12.5', 'E13.5'],
-#     err_style='bars',
-#     palette={'E12.5': '#f210ea', 'E13.5': '#2AA61B', 'In vivo': '#000054'},
-#     lw=3
-# )
-# ax.set_xlabel('Embryonic Age (days)', fontsize=16)
-# ax.set_ylabel('AP Shelf Length (mm)', fontsize=16)
-# plt.tick_params(axis='x', labelsize=14)
-# plt.tick_params(axis='y', labelsize=14)
-# # plt.legend(title=None, fontsize=16)
-# handles, labels = ax.get_legend_handles_labels()
-# l = plt.legend(
-#     handles[2:4],
-#     labels[2:4],
-#     title=None,
-#     frameon=True,
-#     fontsize=14,
-#     title_fontsize=14
-# )
-# sns.despine(left=True)
-# plt.tight_layout()
-# plt.show()
 
 
